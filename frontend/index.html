@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Marvel Toys Store</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+body { background: #0d0d0d; color: #f5f5f5; }
+
+.navbar { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, #ed1d24, #7a0000); padding: 15px 30px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+.navbar .logo { font-size: 24px; font-weight: 800; letter-spacing: 1px; color: #fff; text-decoration: none; cursor: pointer; }
+.navbar .logo span { color: #ffd700; }
+.navbar nav a, .navbar nav button { color: #fff; text-decoration: none; margin-left: 20px; font-weight: 600; background: none; border: none; cursor: pointer; font-size: 15px; }
+.navbar nav a:hover, .navbar nav button:hover { color: #ffd700; }
+
+.hero { text-align: center; padding: 50px 20px; background: radial-gradient(circle at top, #3a0000, #0d0d0d); }
+.hero h1 { font-size: 40px; color: #ffd700; margin-bottom: 10px; }
+.hero p { color: #ccc; font-size: 16px; }
+
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 25px; padding: 30px; }
+.product-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(237,29,36,0.4); }
+.product-card img { width: 100%; height: 200px; object-fit: cover; }
+.product-info { padding: 15px; }
+.product-info h3 { font-size: 16px; margin-bottom: 8px; color: #fff; }
+.product-info p.price { color: #ffd700; font-weight: bold; font-size: 18px; margin-bottom: 12px; }
+
+.btn { display: inline-block; background: #ed1d24; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; width: 100%; transition: background 0.2s ease; }
+.btn:hover { background: #b91117; }
+
+.form-wrapper { max-width: 400px; margin: 60px auto; background: #1a1a1a; padding: 35px; border-radius: 12px; border: 1px solid #333; }
+.form-wrapper h2 { color: #ffd700; margin-bottom: 20px; text-align: center; }
+.form-wrapper input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #444; background: #0d0d0d; color: #fff; font-size: 14px; }
+.form-wrapper p { text-align: center; margin-top: 15px; font-size: 14px; color: #aaa; }
+.form-wrapper p a { color: #ffd700; text-decoration: none; cursor: pointer; }
+
+.message { text-align: center; margin-top: 10px; font-size: 14px; }
+.message.error { color: #ff6b6b; }
+.message.success { color: #6bff8f; }
+
+.cart-container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+.cart-item { display: flex; align-items: center; justify-content: space-between; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+.cart-item img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; margin-right: 15px; }
+.cart-item-details { flex: 1; display: flex; align-items: center; }
+.cart-item-name { flex: 1; }
+.remove-btn { background: #333; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+.remove-btn:hover { background: #ed1d24; }
+.cart-total { text-align: right; font-size: 20px; margin: 20px 0; color: #ffd700; }
+.checkout-btn { max-width: 250px; margin-left: auto; display: block; }
+
+.page { display: none; }
+.page.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="navbar">
+    <a class="logo" onclick="showPage('home')">MARVEL<span>TOYS</span></a>
+    <nav id="nav-right"></nav>
+</div>
+
+<!-- HOME / PRODUCTS PAGE -->
+<div id="page-home" class="page active">
+    <div class="hero">
+        <h1>Assemble Your Collection</h1>
+        <p>Official Marvel action figures, replicas & collectibles</p>
+    </div>
+    <div class="products-grid" id="products-grid">
+        <p>Loading products...</p>
+    </div>
+</div>
+
+<!-- REGISTER PAGE -->
+<div id="page-register" class="page">
+    <div class="form-wrapper">
+        <h2>Create Account</h2>
+        <form onsubmit="handleRegister(event)">
+            <input type="text" id="reg-name" placeholder="Full Name" required>
+            <input type="email" id="reg-email" placeholder="Email Address" required>
+            <input type="password" id="reg-password" placeholder="Password" minlength="6" required>
+            <button type="submit" class="btn">Register</button>
+            <div id="reg-message" class="message"></div>
+        </form>
+        <p>Already have an account? <a onclick="showPage('login')">Login here</a></p>
+    </div>
+</div>
+
+<!-- LOGIN PAGE -->
+<div id="page-login" class="page">
+    <div class="form-wrapper">
+        <h2>Login</h2>
+        <form onsubmit="handleLogin(event)">
+            <input type="email" id="login-email" placeholder="Email Address" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            <button type="submit" class="btn">Login</button>
+            <div id="login-message" class="message"></div>
+        </form>
+        <p>Don't have an account? <a onclick="showPage('register')">Register here</a></p>
+    </div>
+</div>
+
+<!-- CART PAGE -->
+<div id="page-cart" class="page">
+    <div class="cart-container">
+        <h2 style="color:#ffd700; margin-bottom:20px;">My Cart</h2>
+        <div id="cart-items">Loading cart...</div>
+        <div class="cart-total" id="cart-total"></div>
+        <button class="btn checkout-btn" onclick="checkout()">Checkout</button>
+    </div>
+</div>
+
+<script>
+// ==================== CONFIG ====================
+const API_BASE = '/api';
+
+// ==================== PAGE NAVIGATION ====================
+function showPage(pageName) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + pageName).classList.add('active');
+
+    if (pageName === 'home') loadProducts();
+    if (pageName === 'cart') loadCart();
+}
+
+// ==================== AUTH HELPERS ====================
+function getToken() { return localStorage.getItem('token'); }
+function getUser() {
+    const u = localStorage.getItem('user');
+    return u ? JSON.parse(u) : null;
+}
+function saveAuth(token, user) {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+}
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    renderNavbar();
+    showPage('home');
+}
+
+// ==================== NAVBAR ====================
+function renderNavbar() {
+    const user = getUser();
+    const navRight = document.getElementById('nav-right');
+
+    if (user) {
+        navRight.innerHTML = `
+            <a onclick="showPage('home')">Home</a>
+            <a onclick="showPage('cart')">Cart</a>
+            <span style="margin-left:20px;color:#ffd700;">Hi, ${user.name}</span>
+            <button onclick="logout()">Logout</button>
+        `;
+    } else {
+        navRight.innerHTML = `
+            <a onclick="showPage('home')">Home</a>
+            <a onclick="showPage('login')">Login</a>
+            <a onclick="showPage('register')">Register</a>
+        `;
+    }
+}
+
+// ==================== PRODUCTS ====================
+async function loadProducts() {
+    const grid = document.getElementById('products-grid');
+    try {
+        const res = await fetch(`${API_BASE}/products`);
+        const products = await res.json();
+
+        grid.innerHTML = products.map(p => `
+            <div class="product-card">
+                <img src="${p.image_url}" alt="${p.name}">
+                <div class="product-info">
+                    <h3>${p.name}</h3>
+                    <p class="price">₹${Number(p.price).toFixed(2)}</p>
+                    <button class="btn" onclick="addToCart(${p.id})">Add to Cart</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (err) {
+        grid.innerHTML = '<p>Could not load products. Is the backend server running?</p>';
+        console.error(err);
+    }
+}
+
+async function addToCart(productId) {
+    const token = getToken();
+    if (!token) {
+        alert('Please login first to add items to cart.');
+        showPage('login');
+        return;
+    }
+    try {
+        const res = await fetch(`${API_BASE}/cart`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ product_id: productId, quantity: 1 })
+        });
+        const data = await res.json();
+        if (res.ok) { alert('Added to cart!'); }
+        else { alert(data.message || 'Could not add to cart.'); }
+    } catch (err) {
+        console.error(err);
+        alert('Server error. Please try again.');
+    }
+}
+
+// ==================== REGISTER ====================
+async function handleRegister(event) {
+    event.preventDefault();
+    const name = document.getElementById('reg-name').value;
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+    const msgBox = document.getElementById('reg-message');
+
+    try {
+        const res = await fetch(`${API_BASE}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            saveAuth(data.token, data.user);
+            msgBox.textContent = 'Registration successful! Redirecting...';
+            msgBox.className = 'message success';
+            renderNavbar();
+            setTimeout(() => showPage('home'), 800);
+        } else {
+            msgBox.textContent = data.message || 'Registration failed.';
+            msgBox.className = 'message error';
+        }
+    } catch (err) {
+        console.error(err);
+        msgBox.textContent = 'Server error. Please try again.';
+        msgBox.className = 'message error';
+    }
+}
+
+// ==================== LOGIN ====================
+async function handleLogin(event) {
+    event.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const msgBox = document.getElementById('login-message');
+
+    try {
+        const res = await fetch(`${API_BASE}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            saveAuth(data.token, data.user);
+            msgBox.textContent = 'Login successful! Redirecting...';
+            msgBox.className = 'message success';
+            renderNavbar();
+            setTimeout(() => showPage('home'), 800);
+        } else {
+            msgBox.textContent = data.message || 'Login failed.';
+            msgBox.className = 'message error';
+        }
+    } catch (err) {
+        console.error(err);
+        msgBox.textContent = 'Server error. Please try again.';
+        msgBox.className = 'message error';
+    }
+}
+
+// ==================== CART ====================
+async function loadCart() {
+    const container = document.getElementById('cart-items');
+    const token = getToken();
+    if (!token) {
+        container.innerHTML = '<p>Please login to view your cart.</p>';
+        document.getElementById('cart-total').textContent = '';
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/cart`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const items = await res.json();
+
+        if (items.length === 0) {
+            container.innerHTML = '<p>Your cart is empty.</p>';
+            document.getElementById('cart-total').textContent = '';
+            return;
+        }
+
+        container.innerHTML = items.map(item => `
+            <div class="cart-item">
+                <div class="cart-item-details">
+                    <img src="${item.image_url}" alt="${item.name}">
+                    <div class="cart-item-name">
+                        <strong>${item.name}</strong><br>
+                        Qty: ${item.quantity} &times; ₹${Number(item.price).toFixed(2)}
+                    </div>
+                </div>
+                <button class="remove-btn" onclick="removeFromCart(${item.id})">Remove</button>
+            </div>
+        `).join('');
+
+        const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+        document.getElementById('cart-total').textContent = `Total: ₹${total.toFixed(2)}`;
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = '<p>Could not load cart.</p>';
+    }
+}
+
+async function removeFromCart(cartId) {
+    const token = getToken();
+    try {
+        await fetch(`${API_BASE}/cart/${cartId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+        loadCart();
+    } catch (err) { console.error(err); }
+}
+
+async function checkout() {
+    const token = getToken();
+    if (!token) { alert('Please login first.'); return; }
+    try {
+        const res = await fetch(`${API_BASE}/orders/checkout`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok) {
+            alert(`Order placed successfully! Order ID: ${data.order_id}, Total: ₹${data.total_amount}`);
+            loadCart();
+        } else {
+            alert(data.message || 'Checkout failed.');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Server error during checkout.');
+    }
+}
+
+// ==================== INIT ====================
+renderNavbar();
+loadProducts();
+</script>
+</body>
+</html>
