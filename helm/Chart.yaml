@@ -1,0 +1,25 @@
+apiVersion: v2
+
+name: marvel-toys-store
+
+description: A Helm chart for deploying Marvel Toys Store application on Kubernetes
+
+type: application
+
+version: 0.1.0
+
+appVersion: "1.0.0"
+
+keywords:
+  - marvel
+  - toys
+  - ecommerce
+  - nodejs
+  - mysql
+  - kubernetes
+
+home: https://github.com/mosesclouddev/marvel-toys-store
+
+sources:
+  - https://github.com/mosesclouddev/marvel-toys-store
+

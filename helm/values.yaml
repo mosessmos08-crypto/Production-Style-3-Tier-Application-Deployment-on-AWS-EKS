@@ -1,0 +1,109 @@
+# ==========================
+# Frontend Configuration
+# ==========================
+
+frontend:
+  replicaCount: 2
+
+  image:
+    repository: mosesclouddev/marvel-frontend
+    tag: v1
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 80
+
+
+# ==========================
+# Backend Configuration
+# ==========================
+
+backend:
+  replicaCount: 2
+
+  image:
+    repository: mosesclouddev/marvel-backend
+    tag: v1
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 5000
+
+  env:
+    PORT: "5000"
+    DB_HOST: mysql-service
+    DB_PORT: "3306"
+    DB_NAME: marvel_toys_store
+    DB_USER: root
+    JWT_SECRET: marvel_super_secret_key
+
+
+# ==========================
+# MySQL Configuration
+# ==========================
+
+mysql:
+  image:
+    repository: mysql
+    tag: "8.0"
+    pullPolicy: IfNotPresent
+
+  database: marvel_toys_store
+
+  rootPassword: root123
+
+  storage: 10Gi
+
+  service:
+    port: 3306
+
+
+# ==========================
+# Ingress Configuration
+# ==========================
+
+ingress:
+  enabled: true
+
+  className: nginx
+
+  host: marvel.local
+
+  annotations:
+    kubernetes.io/ingress.class: nginx
+
+
+# ==========================
+# Resources
+# ==========================
+
+resources:
+
+  frontend:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+  backend:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  mysql:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+    limits:
+      cpu: 500m
+      memory: 1Gi
